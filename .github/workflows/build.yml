@@ -1,8 +1,8 @@
 name: Build FernFlower
 
 on:
-  workflow_dispatch: # Cho phép build thủ công
-  push:              # Tự động build mỗi lần đẩy code
+  workflow_dispatch:
+  push:
 
 jobs:
   build:
@@ -18,15 +18,17 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
 
-    - name: Compile FernFlower
+    - name: Compile all .java files
       run: |
         mkdir out
-        javac -d out -cp src src/org/jetbrains/java/decompiler/main/externIF/*.java src/org/jetbrains/java/decompiler/main/*.java src/org/jetbrains/java/decompiler/modules/*.java src/org/jetbrains/java/decompiler/modules/decompiler/*.java src/org/jetbrains/java/decompiler/modules/struct/*.java src/org/jetbrains/java/decompiler/runtime/*.java src/org/jetbrains/java/decompiler/util/*.java
+        find src -name "*.java" > sources.txt
+        javac -d out @sources.txt
 
     - name: Package into fernflower.jar
       run: |
         cd out
-        jar cfe ../fernflower.jar org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler *
+        echo "Main-Class: org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler" > manifest.txt
+        jar cfm ../fernflower.jar manifest.txt *
 
     - name: Upload fernflower.jar
       uses: actions/upload-artifact@v4
