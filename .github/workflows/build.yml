@@ -1,4 +1,4 @@
-name: Build FernFlower
+name: Build & Release FernFlower
 
 on:
   workflow_dispatch:
@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # Cho phép tạo release
 
     steps:
     - name: Checkout source
@@ -35,8 +38,10 @@ jobs:
         echo "Main-Class: org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler" > manifest.txt
         jar cfm ../fernflower.jar manifest.txt *
 
-    - name: Upload fernflower.jar
-      uses: actions/upload-artifact@v4
-      with:
-        name: fernflower
-        path: fernflower.jar
+    - name: Create GitHub Release and Upload JAR
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        tag_name="auto-release"
+        gh release delete "$tag_name" -y || true
+        gh release create "$tag_name" fernflower.jar -t "FernFlower CLI" -n "Auto-built FernFlower CLI JAR"
