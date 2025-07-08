@@ -18,11 +18,16 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Download JetBrains Annotations
+      run: |
+        mkdir lib
+        curl -L -o lib/jetbrains-annotations.jar https://repo1.maven.org/maven2/org/jetbrains/annotations/23.0.0/annotations-23.0.0.jar
+
     - name: Compile all .java files
       run: |
         mkdir out
         find src -name "*.java" > sources.txt
-        javac -d out @sources.txt --release 17
+        javac -cp "lib/jetbrains-annotations.jar" -d out @sources.txt --release 17
 
     - name: Package into fernflower.jar
       run: |
